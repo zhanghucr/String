@@ -89,36 +89,36 @@ istream& operator>>(istream& is, String& s)
     int m = 20;
     char c;
     int i = 0;
-    while (is.get(c) && isspace(c));
+
+    while (is.get(c) && isspace(c));  /* skip space header */
+    
+    if (is)
     {
+        do 
+        {
+            s.m_buff[i] = c;
+            i++;
+
+            if (i == m - 1)  /* when reach the last space, double the space size */
+            {
+                s.m_buff[i] = '\0';
+                char *b = new char[m];
+                strcpy(b, s.m_buff);
+                delete[] s.m_buff;
+                m = m * 2;
+                s.m_buff = new char[m];
+                strcpy(s.m_buff, b);
+                delete[] b;
+            }
+        } while (is.get(c) && !isspace(c));
+
+        //如果读到空白,将其放回.
         if (is)
         {
-            do 
-            {
-                s.m_buff[i] = c;
-                i++;
-
-                if (i == m - 1)
-                {
-                    s.m_buff[i] = '\0';
-                    char* b = new char[m];
-                    strcpy(b, s.m_buff);
-                    delete[] s.m_buff;
-                    m = m * 2;
-                    s.m_buff = new char[m];
-                    strcpy(s.m_buff, b);
-                    delete[] b;
-                }
-            } while (is.get(c) && !isspace(c));
-
-            //如果读到空白,将其放回.
-            if (is)
-            {
-                is.unget();
-            }
+            is.unget();
         }
     }
-        
+     
     s.m_size = i;
     s.m_buff[i] = '\0';
     return is;
