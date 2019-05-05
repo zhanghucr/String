@@ -44,29 +44,94 @@ String::~String()
     delete[] m_buff;
 }
 
-String& String::operator=(const String& s)
+String& String::operator=(const char *right)
 {
-    if (this == &s)
+    delete[] m_buff;
+    m_size = strlen(right);
+    m_buff = new char[m_size + 1];
+    strcpy(m_buff, right);
+    return *this;
+}
+
+String& String::operator=(const String& right)
+{
+    if (this == &right)
     {
         return *this;
     }
     
     delete[] m_buff;
-    m_size = strlen(s.m_buff);
+    m_size = strlen(right.m_buff);
     m_buff = new char[m_size + 1];
-    strcpy(m_buff, s.m_buff);
+    strcpy(m_buff, right.m_buff);
     return *this;
 }
 
-String& String::operator+=(const String& s)
+String& String::operator+=(const String& right)
 {
-    int total_size = strlen(m_buff) + strlen(s.m_buff);
+    int total_size = strlen(m_buff) + strlen(right.m_buff);
     char *tmp = new char[total_size + 1];
     strcpy(tmp, m_buff);
-    strcpy(&tmp[strlen(tmp)], s.m_buff);
+    strcpy(&tmp[strlen(tmp)], right.m_buff);
     delete[] m_buff;
     m_buff = tmp;
     return *this;
+}
+
+bool String::operator==(const String& right)
+{
+    if (0 == strcmp(m_buff, right.m_buff))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool String::operator!=(const String& right)
+{
+    if (0 == strcmp(m_buff, right.m_buff))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool String::operator<(const String& right)
+{
+    if (0 > strcmp(m_buff, right.m_buff))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool String::operator>(const String& right)
+{
+    if (0 < strcmp(m_buff, right.m_buff))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+String String::operator+(const String& right)
+{
+    String temp;
+    temp = *this;
+    temp += right;
+    return temp;
 }
 
 int String::length()
