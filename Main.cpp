@@ -3,46 +3,46 @@
 
 using namespace std;
 
+/* 不需要定义为String类的友元函数 */
 ostream& operator<<(ostream& os, String& s)
 {
-    int length = s.length();
-    for (int i = 0; i < length; i++)
+    for (int i = 0; i < s.length(); i++)
     {
+        //os << s.buff[i];这么不行,私有变量.
         os << s[i];
     }
     
     return os;
 }
 
+/* 必须定义为String类的友元函数 */
 istream& operator>>(istream& is, String& s)
 {
-    delete[] s.m_buff;
-    s.m_buff = new char[20];
-    int m = 20;
     char c;
     int i = 0;
-
-    while (is.get(c) && isspace(c));  /* skip space header */
+    int capacity = 20;  /* 预设容量 */
     
+    if (s.buff != NULL)
+    {
+        free(s.buff);
+    }
+
+    s.buff = (char *)malloc(capacity);
+    
+    while (is.get(c) && isspace(c));  /* 剔除前面的空格键 */
     if (is)
     {
         do 
         {
-            s.m_buff[i] = c;
+            s.buff[i] = c;
             i++;
 
-            if (i == m - 1)  /* when reach the last space, double the space size */
+            if (i == capacity - 1)
             {
-                s.m_buff[i] = '\0';
-                char *b = new char[m];
-                strcpy(b, s.m_buff);
-                delete[] s.m_buff;
-                m = m * 2;
-                s.m_buff = new char[m];
-                strcpy(s.m_buff, b);
-                delete[] b;
+                capacity = capacity * 2;
+                s.buff = (char *)realloc(s.buff, capacity);
             }
-        } while (is.get(c) && !isspace(c));
+        } while (is.get(c) && !isspace(c));  /* 遇到空格或者后续没有输入则退出循环 */
 
         //如果读到空白,将其放回.
         if (is)
@@ -51,25 +51,27 @@ istream& operator>>(istream& is, String& s)
         }
     }
 
-    s.m_size = i;
-    s.m_buff[i] = '\0';
+    s.size = i;
+    s.buff[i] = '\0';
     return is;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     String a = "abcd";
     String b;
     b = "www";
-    //String c(6,b);这么写不对.
     String c(6, 'l');
     String d;
     String e = a;  //abcd
     String f;
     cout << "input string: ";
-    cin >> f;  //need input...
+    cin >> f;  //input f...
     String g;
     g = a + b;  //abcdwww
+    String h("qwerty");
+    h += "zxcvb";
+    
     if (a < b)
     {
         cout << "a < b" << endl;
@@ -89,14 +91,15 @@ int main()
     }
 
     b += a;
-    cout << a << endl;
-    cout << b << endl;
-    cout << c << endl;
-    cout << d << endl;
-    cout << e << endl;
-    cout << f << endl;
-    cout << g << endl;
-    cout << g[0] << endl;
+    cout << "a: " << a << endl;
+    cout << "b: " << b << endl;
+    cout << "c: " << c << endl;
+    cout << "d: " << d << endl;
+    cout << "e: " << e << endl;
+    cout << "f: " << f << endl;
+    cout << "g: " << g << endl;
+    cout << "g[0]: " << g[0] << endl;
+    cout << "h: " << h << endl;
     return 0;
 }
 

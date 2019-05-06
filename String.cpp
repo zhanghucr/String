@@ -1,86 +1,163 @@
 /* String.cpp */
 #include "String.h"
 
-String::String()
+String::String():buff(NULL), size(0)
 {
-    m_buff = new char[1];
-    m_buff[0] = '\0';
-    m_size = 0;
 }
 
 String::String(int n, char c)
 {
-    m_buff = new char[n + 1];
-    memset(m_buff, c, n);
-    m_buff[n] = '\0';
-    m_size = n;
+    buff = (char *)malloc(n + 1);
+    if (buff != NULL)
+    {
+        memset(buff, c, n);
+        buff[n] = '\0';
+        size = n;
+    }
 }
 
 String::String(const char *source)
 {
     if (source == NULL)
     {
-        m_buff = new char[1];
-        m_buff[0] = '\0';
-        m_size = 0;
+        buff = NULL;
+        size = 0;
     }
     else
     {
-        m_size = strlen(source);
-        m_buff = new char[m_size + 1];
-        strcpy(m_buff, source);
+        size = strlen(source);
+        buff = (char *)malloc(size + 1);
+        if (buff != NULL)
+        {
+            strcpy(buff, source);
+        }
     }
 }
 
 String::String(const String& s)
 {
-    m_size = strlen(s.m_buff);  //可以访问私有变量. 
-    m_buff = new char[m_size + 1];
-    strcpy(m_buff, s.m_buff);
+    size = s.size;
+    buff = (char *)malloc(size + 1);
+    if (buff != NULL)
+    {
+        strcpy(buff, s.buff);
+    }
 }
 
 String::~String()
 {
-    delete[] m_buff;
+    if (buff != NULL)
+    {
+        free(buff);
+    }
 }
 
-String& String::operator=(const char *right)
+String& String::operator=(const char *s)
 {
-    delete[] m_buff;
-    m_size = strlen(right);
-    m_buff = new char[m_size + 1];
-    strcpy(m_buff, right);
+    if (buff == s)
+    {
+        return *this;
+    }
+
+    if (buff != NULL)
+    {
+        free(buff);
+        buff = NULL;
+    }
+
+    if (s == NULL)
+    {
+        size = 0;
+    }
+    else
+    {
+        size = strlen(s);
+        buff = (char *)malloc(size + 1);
+        if (buff != NULL)
+        {
+            strcpy(buff, s);
+        }
+    }
+    
     return *this;
 }
 
-String& String::operator=(const String& right)
+String& String::operator=(const String& s)
 {
-    if (this == &right)
+    if (this == &s)
+    {
+        return *this;
+    }
+    else
+    {
+        size = s.size;
+        buff = (char *)realloc(buff, size + 1);
+        if (buff != NULL)
+        {
+            strcpy(buff, s.buff);
+        }
+        
+        return *this;
+    }
+}
+
+bool String::operator==(const String& s)
+{
+    if (0 == strcmp(buff, s.buff))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool String::operator!=(const String& s)
+{
+    if (0 == strcmp(buff, s.buff))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+String& String::operator+=(const char *s)
+{
+    if (buff == s || s == NULL)
     {
         return *this;
     }
     
-    delete[] m_buff;
-    m_size = strlen(right.m_buff);
-    m_buff = new char[m_size + 1];
-    strcpy(m_buff, right.m_buff);
+    buff = (char *)realloc(buff, size + 1 + strlen(s));
+    if (buff != NULL)
+    {
+        strcpy(&buff[size], s);
+    }
+
+    size += strlen(s);
     return *this;
 }
 
-String& String::operator+=(const String& right)
+String& String::operator+=(const String& s)
 {
-    int total_size = strlen(m_buff) + strlen(right.m_buff);
-    char *tmp = new char[total_size + 1];
-    strcpy(tmp, m_buff);
-    strcpy(&tmp[strlen(tmp)], right.m_buff);
-    delete[] m_buff;
-    m_buff = tmp;
+    buff = (char *)realloc(buff, size + s.size);
+    if (buff != NULL)
+    {
+        strcpy(&buff[size], s.buff);
+    }
+
+    size += s.size;
+    
     return *this;
 }
 
-bool String::operator==(const String& right)
+bool String::operator>(const String& s)
 {
-    if (0 == strcmp(m_buff, right.m_buff))
+    if (0 < strcmp(buff, s.buff))
     {
         return true;
     }
@@ -90,9 +167,9 @@ bool String::operator==(const String& right)
     }
 }
 
-bool String::operator!=(const String& right)
+bool String::operator<(const String& s)
 {
-    if (0 == strcmp(m_buff, right.m_buff))
+    if (0 < strcmp(buff, s.buff))
     {
         return false;
     }
@@ -102,41 +179,16 @@ bool String::operator!=(const String& right)
     }
 }
 
-bool String::operator<(const String& right)
+String String::operator+(const String& s)
 {
-    if (0 > strcmp(m_buff, right.m_buff))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool String::operator>(const String& right)
-{
-    if (0 < strcmp(m_buff, right.m_buff))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-String String::operator+(const String& right)
-{
-    String temp;
-    temp = *this;
-    temp += right;
+    String temp(*this);
+    temp += s;
     return temp;
 }
 
 int String::length()
 {
-    return strlen(m_buff);
+    return size;
 }
 
 /* end of String.cpp */
